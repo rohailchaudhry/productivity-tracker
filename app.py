@@ -1,8 +1,5 @@
-
-# I have used Flask framework with Json for backend.
-# To store the data, I used the CSV at the backend to store and show the data.
-
-
+# This is the Web Application called Productivity Tacker, created using Flask and CSV files to store Data.
+# Contaims Intertactive GUI to add, read and delete the task easily!
 
 # Imported modules
 from flask import Flask, render_template, request, jsonify
