@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Productivity Task Tracker</title>
+
+    <!-- CSS Intgrated -->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        :root {
+            --bg: #11130f;
+            --panel: #e7e5d5;
+            --panel-dark: #d4d2c2;
+            --ink: #171914;
+            --green: #164f35;
+            --green-bright: #1d754b;
+            --green-dark: #0d3021;
+            --cream: #f2f0df;
+            --red: #a52b22;
+            --yellow: #9a7315;
+            --muted: #62665b;
+            --line: #292d25;
+        }
+
+        body {
+            font-family: "Courier New", Courier, monospace;
+            background: linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px), var(--bg);
+            background-size: 22px 22px;
+            margin: 0;
+            padding: 50px 20px;
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        body::before {
+            /* content: ""; */
+            display: block;
+            max-width: 800px;
+            margin: 0 auto 12px;
+            color: #6e7568;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-align: right;
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--panel);
+            border: 3px solid #050605;
+            border-radius: 0;
+            box-shadow: 8px 8px 0 #050605, 0 0 0 1px #4b5147;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            /* content: "● ● ● / SYS_TASKS.EXE";     */
+            display: block;
+            margin: -30px -30px 28px;
+            padding: 9px 14px;
+            background: var(--green-dark);
+            color: #9fd0a7;
+            border-bottom: 2px solid #050605;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .container::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.025) 0px, rgba(0, 0, 0, 0.025) 1px, transparent 1px, transparent 4px);
+            opacity: 0.45;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 28px;
+            color: var(--green-dark);
+            font-family: "Courier New", Courier, monospace;
+            font-size: clamp(26px, 5vw, 38px);
+            line-height: 1;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        h1::before {
+            content: "> ";
+            color: var(--green-bright);
+        }
+
+        h1::after {
+            content: "_";
+            color: var(--green-bright);
+            animation: blink 1s steps(1) infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 18px;
+            border: 2px solid var(--line);
+            border-radius: 0;
+            background: #dad8c8;
+            position: relative;
+        }
+
+        form::before {
+            content: "NEW_TASK";
+            position: absolute;
+            top: -9px;
+            left: 10px;
+            padding: 0 7px;
+            background: var(--panel);
+            color: var(--green-dark);
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        form input,
+        form select,
+        form button {
+            padding: 11px 12px;
+            border: 2px solid var(--line);
+            border-radius: 0;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 13px;
+            background: var(--cream);
+            color: var(--ink);
+            outline: none;
+        }
+
+        form input:focus,
+        form select:focus {
+            border-color: var(--green-bright);
+            box-shadow: 3px 3px 0 var(--green-bright);
+        }
+
+        #title {
+            flex: 2;
+            min-width: 180px;
+        }
+
+        #priority {
+            flex: 1;
+            min-width: 110px;
+        }
+
+        #due_date {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        form button {
+            background: var(--green-dark);
+            color: #d9f1d5;
+            border-color: #07170f;
+            cursor: pointer;
+            padding: 10px 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 3px 3px 0 #07170f;
+            transition: all 0.08s ease;
+        }
+
+        form button:hover {
+            background: var(--green-bright);
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 #07170f;
+        }
+
+        form button:active {
+            transform: translate(3px, 3px);
+            box-shadow: none;
+        }
+
+        /* table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid var(--line);
+            background: var(--cream);
+            position: relative;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px 9px;
+            border-bottom: 1px dashed #9b9d91;
+            font-size: 13px;
+        } */
+        table {
+            width: 100%;
+            max-width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            border: 2px solid var(--line);
+            background: var(--cream);
+            position: relative;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px 9px;
+            border-bottom: 1px dashed #9b9d91;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 7%;
+        }
+
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 35%;
+        }
+
+        th:nth-child(3),
+        td:nth-child(3) {
+            width: 14%;
+        }
+
+        th:nth-child(4),
+        td:nth-child(4) {
+            width: 15%;
+        }
+
+        th:nth-child(5),
+        td:nth-child(5) {
+            width: 15%;
+        }
+
+        th:nth-child(6),
+        td:nth-child(6) {
+            width: 14%;
+        }
+
+        .task-title {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+            overflow: hidden;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+
+        /* Expanded task */
+        tr.task-expanded .task-title {
+            display: block;
+            -webkit-line-clamp: unset;
+            overflow: visible;
+            white-space: normal;
+        }
+
+        /* Make clickable rows obvious */
+        tbody tr[data-task-row] {
+            cursor: pointer;
+        }
+
+        tbody tr[data-task-row]:hover {
+            background: #d8e0cf;
+        }
+
+        tbody tr.task-expanded {
+            background: #d8e0cf;
+        }
+
+        /* Don't let buttons inherit the row cursor */
+        tbody tr .complete-btn {
+            cursor: pointer;
+        }
+
+        th {
+            color: var(--cream);
+            background: var(--green-dark);
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--line);
+        }
+
+        tbody tr {
+            transition: background 0.1s ease;
+        }
+
+        tbody tr:hover {
+            background: #d8e0cf;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        td:first-child {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        td:nth-child(2) {
+            font-weight: bold;
+        }
+
+        .priority-High {
+            color: var(--red);
+            font-weight: bold;
+        }
+
+        .priority-Medium {
+            color: var(--yellow);
+            font-weight: bold;
+        }
+
+        .priority-Low {
+            color: var(--green-bright);
+            font-weight: bold;
+        }
+
+        .status-Completed {
+            color: var(--green-bright);
+            font-weight: bold;
+        }
+
+        .status-Completed::before {
+            /* content: "[OK] "; */
+            color: var(--green-bright);
+        }
+
+        .status-Pending {
+            color: var(--muted);
+            font-weight: bold;
+        }
+
+        .status-Pending::before {
+            /* content: "[ ] "; */
+            color: var(--muted);
+        }
+
+        .complete-btn {
+            background: var(--panel);
+            color: var(--green-dark);
+            border: 2px solid var(--green-dark);
+            border-radius: 0;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.08s ease;
+        }
+
+        .complete-btn:hover:not(:disabled) {
+            background: var(--green-dark);
+            color: #d9f1d5;
+            box-shadow: 2px 2px 0 #07170f;
+            transform: translate(-1px, -1px);
+        }
+
+        .complete-btn:disabled {
+            background: #bbbbae;
+            color: #65685e;
+            border-color: #777a70;
+            cursor: default;
+        }
+
+        #error-msg {
+            color: var(--red);
+            background: #ead5d0;
+            border: 2px solid var(--red);
+            padding: 9px 12px;
+            font-size: 12px;
+            margin-top: -18px;
+            margin-bottom: 15px;
+            display: none;
+            font-weight: bold;
+        }
+
+        #error-msg::before {
+            content: "ERROR // ";
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 25px 12px;
+            }
+
+            body::before {
+                font-size: 9px;
+                letter-spacing: 1px;
+            }
+
+            .container {
+                padding: 20px;
+                box-shadow: 5px 5px 0 #050605;
+            }
+
+            .container::before {
+                margin: -20px -20px 22px;
+            }
+
+            h1 {
+                font-size: 27px;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            th,
+            td {
+                white-space: normal;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+                padding: 10px 6px;
+                font-size: 11px;
+            }
+
+            .complete-btn {
+                padding: 5px 6px;
+                font-size: 9px;
+            }
+
+            /* th,
+            td {
+                white-space: nowrap;
+            } */
+        }
+
+
+        .rohail-intro {
+            max-width: 800px;
+            margin: 28px auto 0;
+            padding: 35px 30px;
+
+
+            background: #050705;
+            border: 3px solid #292d25;
+
+            box-shadow:
+                8px 8px 0 #050605,
+                0 0 25px rgba(29, 117, 75, 0.08);
+
+            position: relative;
+            overflow: hidden;
+
+            /* IMPORTANT */
+            isolation: isolate;
+        }
+
+        .rohail-intro::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            font-size: 5px;
+            background: repeating-linear-gradient(0deg,
+                    rgba(80, 255, 130, 0.035) 0px,
+                    rgba(80, 255, 130, 0.035) 1px,
+                    transparent 1px,
+                    transparent 5px);
+
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Glow */
+        .rohail-intro::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+
+            background: radial-gradient(ellipse at center,
+                    rgba(29, 117, 75, 0.12),
+                    transparent 65%);
+
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* TEXT */
+        .intro-terminal {
+            position: relative;
+            z-index: 10;
+
+            display: block;
+
+            color: #55c878 !important;
+
+            font-family: "Courier New", Courier, monospace;
+
+            font-size: clamp(22px, 4vw, 38px);
+            line-height: 1.35;
+
+            font-weight: bold;
+            letter-spacing: -1px;
+
+            min-height: 105px;
+
+            text-shadow:
+                0 0 4px rgba(85, 200, 120, 0.7),
+                0 0 12px rgba(29, 117, 75, 0.35);
+
+            animation: introGlow 3s ease-in-out infinite;
+        }
+
+        .intro-prompt {
+            color: #1d754b !important;
+            margin-right: 10px;
+        }
+
+        #rohail-intro-text {
+            color: #55c878 !important;
+            position: relative;
+            z-index: 20;
+        }
+
+        .intro-cursor {
+            color: #55c878 !important;
+            margin-left: 5px;
+
+            animation: introCursorBlink 0.8s steps(1) infinite;
+        }
+
+        /* Glow animation added */
+        @keyframes introGlow {
+
+            0%,
+            100% {
+                text-shadow:
+                    0 0 4px rgba(85, 200, 120, 0.7),
+                    0 0 12px rgba(29, 117, 75, 0.35);
+            }
+
+            50% {
+                text-shadow:
+                    0 0 7px rgba(85, 200, 120, 0.9),
+                    0 0 20px rgba(29, 117, 75, 0.55);
+            }
+        }
+
+        @keyframes introCursorBlink {
+
+            0%,
+            49% {
+                opacity: 1;
+            }
+
+            50%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .rohail-intro {
+                padding: 25px 20px;
+                margin-top: 22px;
+            }
+
+            .intro-terminal {
+                font-size: 21px;
+                min-height: 120px;
+            }
+        }
+
+/* Delete menu for the frontend */
+        .retro-context-menu {
+            position: fixed !important;
+            display: none;
+            z-index: 20000;
+            min-width: 170px;
+            background: #e7e5d5;
+            border: 2px solid #0d3021;
+            box-shadow: 4px 4px 0 #050605;
+            font-family: "Courier New", monospace;
+        }
+
+        .retro-context-menu button {
+            width: 100%;
+            padding: 10px 12px;
+            border: none;
+            background: transparent;
+            color: #a52b22;
+            text-align: left;
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .retro-context-menu button:hover {
+            background: #a52b22;
+            color: white;
+        }
+
+        .retro-context-menu button.delete-option {
+            color: #a52b22;
+        }
+
+        .retro-context-menu button.delete-option:hover {
+            background: #a52b22;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Productivity Task Tracker</h1>
+
+        <!-- Task creation form -->
+        <form id="task-form">
+            <input type="text" id="title" placeholder="Task title" required>
+            <select id="priority" required>
+                <option value="" disabled selected>Priority</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+            <input type="date" id="due_date" required>
+            <button type="submit">Add Task</button>
+        </form>
+        <div id="error-msg"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Priority</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="task-table-body">
+                <!-- Rows injected here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- name -->
+
+    <div class="rohail-intro">
+        <div class="intro-terminal">
+            <span class="intro-prompt">&gt;</span>
+            <span id="rohail-intro-text"></span>
+            <span class="intro-cursor">_</span>
+        </div>
+    </div>
+
+
+    <script>
+        const form = document.getElementById("task-form");
+        const tableBody = document.getElementById("task-table-body");
+        const errorMsg = document.getElementById("error-msg");
+        const container = document.querySelector(".container");
+        const heading = document.querySelector("h1");
+
+    //    Fucntioality
+        async function loadTasks() {
+            try {
+                const response = await fetch("/api/tasks");
+
+                if (!response.ok) {
+                    throw new Error("Failed to load tasks");
+                }
+
+                const tasks = await response.json();
+                renderTable(tasks);
+            } catch (error) {
+                console.error(error);
+                errorMsg.textContent = "Unable to load tasks.";
+                errorMsg.style.display = "block";
+            }
+        }
+
+        function renderTable(tasks) {
+            tableBody.innerHTML = "";
+
+            tasks.forEach(function (task) {
+                const row = document.createElement("tr");
+                const isDone = task.status === "Completed";
+
+                row.setAttribute("data-task-row", "true");
+
+                row.innerHTML = `
+            <td>${task.id}</td>
+
+            <td>
+                <div class="task-title">
+                    ${escapeHtml(task.title)}
+                </div>
+            </td>
+
+            <td class="priority-${task.priority}">
+                ${task.priority}
+            </td>
+
+            <td>${task.due_date}</td>
+
+            <td class="status-${task.status}">
+                ${task.status}
+            </td>
+
+            <td>
+                <button
+                    class="complete-btn"
+                    data-id="${task.id}"
+                    ${isDone ? "disabled" : ""}
+                >
+                    ${isDone ? "Done" : "Complete"}
+                </button>
+            </td>
+        `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+
+        function escapeHtml(str) {
+            const div = document.createElement("div");
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+
+    // You can add the task
+
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            errorMsg.style.display = "none";
+
+            const title = document.getElementById("title").value.trim();
+            const priority = document.getElementById("priority").value;
+            const dueDate = document.getElementById("due_date").value;
+
+            if (!title || !priority || !dueDate) {
+                errorMsg.textContent = "Please complete all fields.";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/tasks", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        priority: priority,
+                        due_date: dueDate
+                    })
+                });
+
+                if (!response.ok) {
+                    let errorMessage = "Something went wrong.";
+
+                    try {
+                        const err = await response.json();
+                        errorMessage = err.error || errorMessage;
+                    } catch (_) { }
+
+                    errorMsg.textContent = errorMessage;
+                    errorMsg.style.display = "block";
+                    return;
+                }
+
+                /*
+                 * Only reset AFTER the server successfully
+                 * accepts the task.
+                 */
+                form.reset();
+
+                await loadTasks();
+
+                systemActivity();
+
+            } catch (error) {
+                console.error(error);
+
+                errorMsg.textContent = "Unable to connect to the server.";
+                errorMsg.style.display = "block";
+            }
+        });
+
+        // It will expand the task
+
+        tableBody.addEventListener("click", function (e) {
+
+            /* Do not expand/collapse when clicking the Complete button */
+            if (e.target.closest(".complete-btn")) {
+                return;
+            }
+
+            const row = e.target.closest("tr[data-task-row]");
+
+            if (!row) {
+                return;
+            }
+
+            row.classList.toggle("task-expanded");
+        });
+
+
+    //  COmplete the task fully
+
+        tableBody.addEventListener("click", async function (e) {
+
+            if (!e.target.classList.contains("complete-btn")) {
+                return;
+            }
+
+
+            const id = e.target.getAttribute("data-id");
+
+            try {
+                const response = await fetch("/api/tasks/complete", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: id
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Could not complete task");
+                }
+
+                systemActivity();
+
+                await loadTasks();
+
+            } catch (error) {
+                console.error(error);
+
+                errorMsg.textContent = "Unable to complete task.";
+                errorMsg.style.display = "block";
+            }
+        });
+
+
+        // Effect Added
+
+        const scanlines = document.createElement("div");
+
+        scanlines.style.position = "fixed";
+        scanlines.style.inset = "0";
+        scanlines.style.pointerEvents = "none";
+        scanlines.style.zIndex = "9999";
+        scanlines.style.opacity = "0.08";
+        scanlines.style.background = `
+    repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 120, 0.15) 0px,
+        rgba(0, 255, 120, 0.15) 1px,
+        transparent 1px,
+        transparent 4px
+    )
+`;
+        scanlines.style.animation = "crtScan 8s linear infinite";
+
+        document.body.appendChild(scanlines);
+
+
+    //  Animation
+
+        const animationStyle = document.createElement("style");
+
+        animationStyle.textContent = `
+@keyframes crtScan {
+    0% {
+        transform: translateY(-5%);
+    }
+
+    100% {
+        transform: translateY(5%);
+    }
+}
+
+@keyframes computerFlicker {
+    0%, 94%, 96%, 100% {
+        opacity: 1;
+    }
+
+    95% {
+        opacity: 0.75;
+    }
+}
+
+@keyframes terminalPulse {
+    0%, 100% {
+        text-shadow: none;
+    }
+
+    50% {
+        text-shadow:
+            0 0 3px rgba(40, 180, 100, 0.5);
+    }
+}
+
+@keyframes cursorBlink {
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes statusBlink {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.25;
+    }
+}
+
+@keyframes processingFlash {
+    0% {
+        background-color: rgba(29, 117, 75, 0.25);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+.retro-active {
+    animation: computerFlicker 6s infinite;
+}
+
+.retro-terminal {
+    animation: terminalPulse 2s infinite;
+}
+
+.retro-boot {
+    color: #1d754b;
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-top: -18px;
+    margin-bottom: 18px;
+    min-height: 14px;
+}
+
+.retro-cursor {
+    display: inline-block;
+    width: 7px;
+    height: 12px;
+    background: #1d754b;
+    margin-left: 3px;
+    vertical-align: middle;
+    animation: cursorBlink 0.8s steps(1) infinite;
+}
+
+.retro-status {
+    position: fixed;
+    bottom: 12px;
+    right: 14px;
+    z-index: 10000;
+    color: #6e7568;
+    background: #11130f;
+    border: 1px solid #292d25;
+    padding: 5px 8px;
+    font-family: "Courier New", monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    opacity: 0.75;
+}
+
+.retro-status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 5px;
+    background: #1d754b;
+    border-radius: 50%;
+    animation: statusBlink 1.4s infinite;
+}
+
+.retro-processing {
+    animation: processingFlash 0.25s ease;
+}
+`;
+
+        document.head.appendChild(animationStyle);
+
+
+
+        const bootText = document.createElement("div");
+
+        bootText.className = "retro-boot";
+
+        heading.insertAdjacentElement("afterend", bootText);
+
+        const bootMessages = [
+            "initializing task_manager...",
+            "loading productivity kernel...",
+            "checking task database...",
+            "memory check: OK",
+            "system ready."
+        ];
+
+        let bootIndex = 0;
+
+        function runBootSequence() {
+
+            if (bootIndex >= bootMessages.length) {
+                bootText.innerHTML =
+                    "> system ready <span class='retro-cursor'></span>";
+                return;
+            }
+
+            bootText.textContent =
+                "> " + bootMessages[bootIndex];
+
+            bootIndex++;
+
+            setTimeout(runBootSequence, 350);
+        }
+
+        runBootSequence();
+
+        const status = document.createElement("div");
+
+        status.className = "retro-status";
+
+        status.innerHTML = `
+    <span class="retro-status-dot"></span>
+    Rohail Tracker ONLINE
+`;
+        document.body.appendChild(status);
+
+        container.classList.add("retro-active");
+        container.classList.add("retro-terminal");
+        const systemMessages = [
+            "CPU: OK",
+            "MEM: OK",
+            "DB: SYNC",
+            "TASK_ENGINE: ACTIVE",
+            "IO: READY",
+            "CACHE: OK",
+            "KERNEL: RUNNING"
+        ];
+
+        let messageIndex = 0;
+
+        setInterval(function () {
+
+            messageIndex++;
+
+            if (messageIndex >= systemMessages.length) {
+                messageIndex = 0;
+            }
+
+            status.innerHTML = `
+        <span class="retro-status-dot"></span>
+        Rohail Tracker ${systemMessages[messageIndex]}
+    `;
+
+        }, 3000);
+
+    //    Table
+
+        const observer = new MutationObserver(function () {
+
+            const rows = tableBody.querySelectorAll("tr");
+
+            rows.forEach(function (row, index) {
+
+                if (row.dataset.retroAnimated) {
+                    return;
+                }
+
+                row.dataset.retroAnimated = "true";
+
+                row.style.opacity = "0";
+                row.style.transform = "translateX(-8px)";
+
+                row.style.transition = `
+            opacity 0.25s ease,
+            transform 0.25s ease
+        `;
+                setTimeout(function () {
+                    row.style.opacity = "1";
+                    row.style.transform = "translateX(0)";
+                }, index * 70);
+
+            });
+
+        });
+
+        observer.observe(tableBody, {
+            childList: true
+        });
+
+        function systemActivity() {
+
+            container.classList.remove("retro-processing");
+
+            void container.offsetWidth;
+
+            container.classList.add("retro-processing");
+        }
+
+// Title
+
+        const originalTitle = document.title;
+
+        setInterval(function () {
+
+            document.title =
+                document.title === originalTitle
+                    ? "Rohail Tracker RUNNING..."
+                    : originalTitle;
+
+        }, 4000);
+
+// Load
+
+        loadTasks();
+
+    //  Delete the menu
+
+        const deleteMenu = document.createElement("div");
+
+        deleteMenu.className = "retro-context-menu";
+
+        deleteMenu.innerHTML = `
+    <button class="delete-option">
+        [X] DELETE TASK
+    </button>
+`;
+
+        document.body.appendChild(deleteMenu);
+
+        let selectedTaskId = null;
+
+
+        // /* Show menu when right click
+
+        tableBody.addEventListener("contextmenu", function (event) {
+
+            const row = event.target.closest("tr");
+
+            if (!row) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const button = row.querySelector(".complete-btn");
+
+            if (!button) {
+                return;
+            }
+
+            selectedTaskId = button.getAttribute("data-id");
+
+            deleteMenu.style.display = "block";
+
+            // 
+            //   Keep the menu inside the screen
+            //  
+            let x = event.clientX;
+            let y = event.clientY;
+
+            const menuWidth = 170;
+            const menuHeight = 45;
+
+            if (x + menuWidth > window.innerWidth) {
+                x = window.innerWidth - menuWidth - 10;
+            }
+
+            if (y + menuHeight > window.innerHeight) {
+                y = window.innerHeight - menuHeight - 10;
+            }
+
+            deleteMenu.style.left = x + "px";
+            deleteMenu.style.top = y + "px";
+        });
+
+
+        // Delete the task
+
+        deleteMenu.querySelector(".delete-option").addEventListener("click", async function () {
+
+            if (!selectedTaskId) {
+                return;
+            }
+
+            const taskId = selectedTaskId;
+
+            deleteMenu.style.display = "none";
+            selectedTaskId = null;
+            const confirmed = confirm(
+
+                "Are you sure you want to delete this task?"
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/tasks/" + taskId, {
+                    method: "DELETE"
+                });
+
+                if (!response.ok) {
+                    throw new Error("Delete failed");
+                }
+
+                systemActivity();
+                await loadTasks();
+
+            } catch (error) {
+
+                console.error(error);
+                errorMsg.textContent = "Unable to delete task.";
+                errorMsg.style.display = "block";
+            }
+        });
+
+        // Close
+        document.addEventListener("click", function (event) {
+
+            if (deleteMenu.contains(event.target)) {
+                return;
+            }
+
+            deleteMenu.style.display = "none";
+            selectedTaskId = null;
+        });
+
+        /* Close menu with Escape */
+        document.addEventListener("keydown", function (event) {
+
+            if (event.key === "Escape") {
+                deleteMenu.style.display = "none";
+                selectedTaskId = null;
+            }
+        });
+
+
+const rohailIntroText = document.getElementById("rohail-intro-text");
+
+
+// Add the Name
+if (rohailIntroText) {
+    const introMessage =
+        "Hi! I'm Rohail. A Computer Science enthusiast passionate about Software development.";
+    let introIndex = 0;
+    function typeRohailIntro() {
+        if (introIndex < introMessage.length) {
+            rohailIntroText.textContent =
+                introMessage.substring(0, introIndex + 1);
+            introIndex++;
+
+            setTimeout(typeRohailIntro, 45);
+        }
+    }
+
+    setTimeout(typeRohailIntro, 700);
+}
+
+
+    </script>
+
+
+</body>
+
+</html>
